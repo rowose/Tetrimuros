@@ -7,9 +7,14 @@ public class Spawner : MonoBehaviour
     [Header ("Parameters")]
     [SerializeField] Wall[] walls;
     [SerializeField] float spawnDelay = 2f;
-    [SerializeField] float baseSpeed = 2f;
+    [SerializeField] float baseSpeed = 10f;
+    [SerializeField] float maxSpeed = 30f;
+    [SerializeField] int wallCounterSpeedUp = 5;
+    [SerializeField] float speedToAdd  = 2f;
 
     float lastWall = 0f;
+    List<Wall> instantiatedWalls = new List<Wall>();
+    int counter = 0;
 
     private void Start() {
         InvokeRepeating("SpawnWall", 0, spawnDelay);
@@ -21,7 +26,15 @@ public class Spawner : MonoBehaviour
 
     private void SpawnWall()
     {
-        InstantiateWall().SetSpeed(baseSpeed);
+        instantiatedWalls.Add(InstantiateWall());
+        counter++;
+        if (counter >= wallCounterSpeedUp && baseSpeed < maxSpeed)
+        {
+            baseSpeed += speedToAdd;
+            counter = 0;
+        }
+        foreach(Wall wall in instantiatedWalls)
+            wall.SetSpeed(baseSpeed);
     }
 
     private Wall InstantiateWall()
@@ -31,8 +44,8 @@ public class Spawner : MonoBehaviour
 
 		if (i != lastWall)
 		{
-			wall = Instantiate(walls[i], transform.position, transform.rotation);
-			lastWall = i;
+			wall = Instantiate(walls[i], transform.position, walls[i].transform.rotation);
+            lastWall = i;
 		}
         else
             return InstantiateWall();
